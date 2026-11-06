@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useState, useEffect } from 'react'
 import WeatherWidget from './components/WeatherWidget'
 import NewsFeed from './components/NewsFeed'
 import TrailsGuide from './components/TrailsGuide'
@@ -63,6 +62,30 @@ function App() {
         const interval = setInterval(fetchWeather, 300000); // 5 minutes
 
         return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        const scrollToHashTrail = () => {
+            const hash = window.location.hash.replace('#', '');
+            if (!hash.startsWith('trail-')) return;
+            const trailId = parseInt(hash.replace('trail-', ''), 10);
+            const foundTrail = trails.find(t => t.id === trailId);
+            if (foundTrail) {
+                setSelectedTrail(foundTrail);
+            }
+            setTimeout(() => {
+                const element = document.getElementById(hash);
+                if (element) {
+                    document.querySelectorAll('.card-selected').forEach(c => c.classList.remove('card-selected'));
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.classList.add('card-selected');
+                }
+            }, 350);
+        };
+
+        scrollToHashTrail();
+        window.addEventListener('hashchange', scrollToHashTrail);
+        return () => window.removeEventListener('hashchange', scrollToHashTrail);
     }, []);
 
     const scoredTrails = weather ? trails.map(trail => {
